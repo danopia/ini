@@ -1,0 +1,27 @@
+name: Deno INI CI
+
+on:
+  push:
+  pull_request:
+  # https://crontab.guru/#0_0_*_*_SUN
+  schedule:
+  - cron: '0 0 * * SUN'
+
+jobs:
+  test:
+    name: Tests
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup Deno
+      uses: denolib/setup-deno@master
+      with:
+        deno-version: 0.x
+    - name: Test
+      run: deno test --allow-read test/bar.ts test/foo.ts
