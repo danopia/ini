@@ -23,7 +23,5 @@ jobs:
       uses: denolib/setup-deno@master
       with:
         deno-version: 0.x
-    - name: Debug Windows Paths
-      run: deno --allow-read test/foo.ts
     - name: Test
       run: deno test --allow-read test/bar.ts test/foo.ts
