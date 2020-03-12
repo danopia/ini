@@ -8,9 +8,14 @@ on:
   - cron: '0 0 * * SUN'
 
 jobs:
-  build:
+  test:
+    name: Tests
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v1
