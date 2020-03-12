@@ -1,7 +1,7 @@
+import { EOL } from 'https://deno.land/std/path/constants.ts'
+
 export const parse = decode
 export const stringify = encode
-
-const eol = Deno?.build?.os == "win" ?? false ? '\r\n' : '\n'
 
 export interface EncodeOptions {
   section?: string,
@@ -24,12 +24,12 @@ export function encode (obj: any, opt: string | EncodeOptions = { whitespace: fa
     } else if (val && typeof val === 'object') {
       children.push(k)
     } else {
-      out += safe(k) + separator + safe(val) + eol
+      out += safe(k) + separator + safe(val) + EOL
     }
   })
 
   if (options.section && out.length) {
-    out = '[' + safe(options.section) + ']' + eol + out
+    out = '[' + safe(options.section) + ']' + EOL + out
   }
 
   children.forEach(function (k, _, __) {
@@ -40,7 +40,7 @@ export function encode (obj: any, opt: string | EncodeOptions = { whitespace: fa
       whitespace: options.whitespace
     })
     if (out.length && child.length) {
-      out += eol
+      out += EOL
     }
     out += child
   })
