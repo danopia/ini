@@ -1,12 +1,13 @@
-var i = require("../")
-  , tap = require("tap")
-  , test = tap.test
-  , fs = require("fs")
-  , path = require("path")
-  , fixture = path.resolve(__dirname, "./fixtures/foo.ini")
-  , data = fs.readFileSync(fixture, "utf8")
-  , d
-  , expectE = 'o=p\n'
+import { assertEquals, assertNotEquals } from 'https://deno.land/std/testing/asserts.ts'
+import { readFileStrSync } from 'https://deno.land/std/fs/read_file_str.ts'
+import { dirname, resolve } from 'https://deno.land/std/path/mod.ts'
+
+import * as i from '../ini.ts'
+const { test } = Deno
+const data = readFileStrSync(resolve(dirname(new URL(import.meta.url).pathname), './fixtures/foo.ini'), { encoding: 'utf-8' })
+
+let d = undefined
+const expectE = 'o=p\n'
             + 'a with spaces=b  c\n'
             + '" xa  n          p "="\\"\\r\\nyoyoyo\\r\\r\\n"\n'
             + '"[disturbing]"=hey you never know\n'
@@ -51,7 +52,7 @@ var i = require("../")
          j: '"{ o: "p", a: { av: "a val", b: { c: { e: "this [value]" } } } }"',
          "[]": "a square?",
          cr: ['four', 'eight'],
-         b: { c: { e: '1', j: '2' } } },
+         b: { c: { e: 1, j: 2 } } },
       'x.y.z': {
         'x.y.z': 'xyz',
         'a.b.c': {
@@ -72,36 +73,31 @@ var i = require("../")
             + 'label = debug\n'
             + 'value = 10\n'
 
-test("decode from file", function (t) {
+test(function decodeFromFile() {
   var d = i.decode(data)
-  t.deepEqual(d, expectD)
-  t.end()
+  assertEquals(d, expectD)
 })
 
-test("encode from data", function (t) {
+test(function encodeFromData() {
   var e = i.encode(expectD)
-  t.deepEqual(e, expectE)
+  assertEquals(e, expectE)
 
   var obj = {log: { type:'file', level: {label:'debug', value:10} } }
   e = i.encode(obj)
-  t.notEqual(e.slice(0, 1), '\n', 'Never a blank first line')
-  t.notEqual(e.slice(-2), '\n\n', 'Never a blank final line')
-
-  t.end()
+  assertNotEquals(e.slice(0, 1), '\n', 'Never a blank first line')
+  assertNotEquals(e.slice(-2), '\n\n', 'Never a blank final line')
 })
 
-test("encode with option", function (t) {
+test(function encodeWithOption() {
   var obj = {log: { type:'file', level: {label:'debug', value:10} } }
-  e = i.encode(obj, {section: 'prefix'})
+  const e = i.encode(obj, { section: 'prefix' })
 
-  t.equal(e, expectF)
-  t.end()
+  assertEquals(e, expectF)
 })
 
-test("encode with whitespace", function (t) {
+test(function encodeWithWhitespace() {
   var obj = {log: { type:'file', level: {label:'debug', value:10} } }
-  e = i.encode(obj, {whitespace: true})
+  const e = i.encode(obj, { whitespace: true })
 
-  t.equal(e, expectG)
-  t.end()
+  assertEquals(e, expectG)
 })

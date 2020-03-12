@@ -1,31 +1,22 @@
-exports.parse = exports.decode = decode
+export const parse = decode
+export const stringify = encode
 
-exports.stringify = exports.encode = encode
+const eol = Deno?.build?.os == "win" ?? false ? '\r\n' : '\n'
 
-exports.safe = safe
-exports.unsafe = unsafe
+export interface EncodeOptions {
+  section?: string,
+  whitespace?: boolean
+}
 
-var eol = typeof process !== 'undefined' &&
-  process.platform === 'win32' ? '\r\n' : '\n'
+export function encode (obj: any, opt: string | EncodeOptions = { whitespace: false }) {
+  const children = [] as string[]
+  let out = ''
+  let options = typeof opt === 'string' ? { section: opt, whitespace: false } : opt
 
-function encode (obj, opt) {
-  var children = []
-  var out = ''
-
-  if (typeof opt === 'string') {
-    opt = {
-      section: opt,
-      whitespace: false
-    }
-  } else {
-    opt = opt || {}
-    opt.whitespace = opt.whitespace === true
-  }
-
-  var separator = opt.whitespace ? ' = ' : '='
+  const separator = options.whitespace ? ' = ' : '='
 
   Object.keys(obj).forEach(function (k, _, __) {
-    var val = obj[k]
+    const val = obj[k]
     if (val && Array.isArray(val)) {
       val.forEach(function (item) {
         out += safe(k + '[]') + separator + safe(item) + '\n'
@@ -37,16 +28,16 @@ function encode (obj, opt) {
     }
   })
 
-  if (opt.section && out.length) {
-    out = '[' + safe(opt.section) + ']' + eol + out
+  if (options.section && out.length) {
+    out = '[' + safe(options.section) + ']' + eol + out
   }
 
   children.forEach(function (k, _, __) {
-    var nk = dotSplit(k).join('\\.')
-    var section = (opt.section ? opt.section + '.' : '') + nk
-    var child = encode(obj[k], {
+    const nk = dotSplit(k).join('\\.')
+    const section = (options.section ? options.section + '.' : '') + nk
+    const child = encode(obj[k], {
       section: section,
-      whitespace: opt.whitespace
+      whitespace: options.whitespace
     })
     if (out.length && child.length) {
       out += eol
@@ -57,7 +48,7 @@ function encode (obj, opt) {
   return out
 }
 
-function dotSplit (str) {
+function dotSplit (str: string) {
   return str.replace(/\1/g, '\u0002LITERAL\\1LITERAL\u0002')
     .replace(/\\\./g, '\u0001')
     .split(/\./).map(function (part) {
@@ -66,29 +57,32 @@ function dotSplit (str) {
     })
 }
 
-function decode (str) {
-  var out = {}
-  var p = out
-  var section = null
+export function decode (str: string) {
+  const out: any = {}
+  let p = out
   //          section     |key      = value
-  var re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i
-  var lines = str.split(/[\r\n]+/g)
+  const re = /^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i
+  const lines = str.split(/[\r\n]+/g)
 
   lines.forEach(function (line, _, __) {
     if (!line || line.match(/^\s*[;#]/)) return
-    var match = line.match(re)
+    const match = line.match(re)
     if (!match) return
     if (match[1] !== undefined) {
-      section = unsafe(match[1])
+      let section = unsafe(match[1])
       p = out[section] = out[section] || {}
       return
     }
-    var key = unsafe(match[2])
-    var value = match[3] ? unsafe(match[4]) : true
+    let key = unsafe(match[2])
+    let value: boolean | number | string = match[3] ? unsafe(match[4]) : true
     switch (value) {
       case 'true':
       case 'false':
       case 'null': value = JSON.parse(value)
+    }
+    const valueAsFloat = parseFloat(`${value}`)
+    if (!Number.isNaN(valueAsFloat)) {
+      value = valueAsFloat
     }
 
     // Convert keys with '[]' suffix to an array
@@ -120,18 +114,18 @@ function decode (str) {
     }
     // see if the parent section is also an object.
     // if so, add it to that, and mark this one for deletion
-    var parts = dotSplit(k)
-    var p = out
-    var l = parts.pop()
-    var nl = l.replace(/\\\./g, '.')
+    const parts = dotSplit(k)
+    let parentSection = out
+    const lastPart = parts.pop() ?? ''
+    const nl = lastPart.replace(/\\\./g, '.')
     parts.forEach(function (part, _, __) {
-      if (!p[part] || typeof p[part] !== 'object') p[part] = {}
-      p = p[part]
+      if (!parentSection[part] || typeof parentSection[part] !== 'object') parentSection[part] = {}
+      parentSection = parentSection[part]
     })
-    if (p === out && nl === l) {
+    if (parentSection === out && nl === lastPart) {
       return false
     }
-    p[nl] = out[k]
+    parentSection[nl] = out[k]
     return true
   }).forEach(function (del, _, __) {
     delete out[del]
@@ -140,24 +134,23 @@ function decode (str) {
   return out
 }
 
-function isQuoted (val) {
+function isQuoted (val: string) {
   return (val.charAt(0) === '"' && val.slice(-1) === '"') ||
     (val.charAt(0) === "'" && val.slice(-1) === "'")
 }
 
-function safe (val) {
+export function safe (val: string | any) {
   return (typeof val !== 'string' ||
     val.match(/[=\r\n]/) ||
     val.match(/^\[/) ||
-    (val.length > 1 &&
-     isQuoted(val)) ||
+    (val.length > 1 && isQuoted(val)) ||
     val !== val.trim())
       ? JSON.stringify(val)
       : val.replace(/;/g, '\\;').replace(/#/g, '\\#')
 }
 
-function unsafe (val, doUnesc) {
-  val = (val || '').trim()
+export function unsafe (val = '') {
+  val = val.trim()
   if (isQuoted(val)) {
     // remove the single quotes before calling JSON.parse
     if (val.charAt(0) === "'") {
@@ -165,11 +158,11 @@ function unsafe (val, doUnesc) {
     }
     try { val = JSON.parse(val) } catch (_) {}
   } else {
-    // walk the val to find the first not-escaped ; character
-    var esc = false
-    var unesc = ''
-    for (var i = 0, l = val.length; i < l; i++) {
-      var c = val.charAt(i)
+    // walk the val to find the first unescaped ; character
+    let esc = false
+    let unesc = ''
+    for (let i = 0, l = val.length; i < l; i++) {
+      const c = val.charAt(i)
       if (esc) {
         if ('\\;#'.indexOf(c) !== -1) {
           unesc += c
