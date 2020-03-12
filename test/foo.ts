@@ -1,10 +1,10 @@
 import { assertEquals, assertNotEquals } from 'https://deno.land/std/testing/asserts.ts'
 import { readFileStrSync } from 'https://deno.land/std/fs/read_file_str.ts'
-import { dirname, resolve } from 'https://deno.land/std/path/mod.ts'
+import { resolve } from 'https://deno.land/std/path/mod.ts'
 
 import * as i from '../ini.ts'
 const { test } = Deno
-const data = readFileStrSync(resolve(dirname(new URL(import.meta.url).pathname), './fixtures/foo.ini'), { encoding: 'utf-8' })
+const data = readFileStrSync(resolve('./test/fixtures/foo.ini'), { encoding: 'utf-8' })
 
 let d = undefined
 const expectE = 'o=p\n'
