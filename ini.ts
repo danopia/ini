@@ -19,7 +19,7 @@ export function encode (obj: any, opt: string | EncodeOptions = { whitespace: fa
     const val = obj[k]
     if (val && Array.isArray(val)) {
       val.forEach(function (item) {
-        out += safe(k + '[]') + separator + safe(item) + '\n'
+        out += safe(k + '[]') + separator + safe(item) + EOL
       })
     } else if (val && typeof val === 'object') {
       children.push(k)
