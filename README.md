@@ -1,3 +1,5 @@
+![Deno INI CI](https://github.com/chances/ini/workflows/Deno%20INI%20CI/badge.svg?branch=master)
+
 An INI configuration parser and serializer for the Deno runtime.
 
 Sections are treated as nested objects.  Items before the first
