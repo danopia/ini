@@ -16,7 +16,7 @@ const data: MockData = {
   'nested boolean': {theDude: {abides: true, rugCount: 1}}
 }
 
-test("stringify then parse", function () {
+test("stringifyThenParse", function () {
   for (var k in data) {
     const s = ini.stringify(data[k])
     assertEquals(ini.parse(s), data[k])

@@ -11,6 +11,26 @@ export interface EncodeOptions {
   whitespace?: boolean
 }
 
+/**
+ * Encode the object `object` into an ini-style formatted string. If the
+ * optional parameter `section` is given, then all top-level properties
+ * of the object are put into this section and the `section`-string is
+ * prepended to all sub-sections, see the usage example above.
+ * 
+ * The `options` object may contain the following:
+ * - `section` A string which will be the first `section` in the encoded
+ *   ini data.  Defaults to none.
+ * - `whitespace` Boolean to specify whether to put whitespace around the
+ *   `=` character.  By default, whitespace is omitted, to be friendly to
+ *   some persnickety old parsers that don't tolerate it well.  But some
+ *   find that it's more human-readable and pretty with the whitespace.
+ * 
+ * For backwards compatibility reasons, if a `string` options is passed,
+ * then it is assumed to be the `section` value.
+ * 
+ * @param obj Object to encode
+ * @param opt Encoding options
+ */
 export function encode (obj: any, opt: string | EncodeOptions = { whitespace: false }) {
   const children = [] as string[]
   let out = ''
@@ -22,7 +42,7 @@ export function encode (obj: any, opt: string | EncodeOptions = { whitespace: fa
     const val = obj[k]
     if (val && Array.isArray(val)) {
       val.forEach(function (item) {
-        out += safe(k + '[]') + separator + safe(item) + '\n'
+        out += safe(k + '[]') + separator + safe(item) + EOL
       })
     } else if (val && typeof val === 'object') {
       children.push(k)
@@ -60,6 +80,10 @@ function dotSplit (str: string) {
     })
 }
 
+/**
+ * Decode the given ini-style formatted document into a nested object.
+ * @param str ini-style document
+ */
 export function decode (str: string) {
   const out: any = {}
   let p = out
@@ -142,6 +166,21 @@ function isQuoted (val: string) {
     (val.charAt(0) === "'" && val.slice(-1) === "'")
 }
 
+/**
+ * Escapes the string `val` such that it is safe to be used as a key or
+ * value in an ini-file. Basically escapes quotes. For example:
+ * 
+ * ```javascript
+ * ini.safe('"unsafe string"')
+ * ```
+ * 
+ * would result in
+ * 
+ * ```javascript
+ * "\"unsafe string\""
+ * ```
+ * @param val String to escape
+ */
 export function safe (val: string | any) {
   return (typeof val !== 'string' ||
     val.match(/[=\r\n]/) ||
@@ -152,6 +191,10 @@ export function safe (val: string | any) {
       : val.replace(/;/g, '\\;').replace(/#/g, '\\#')
 }
 
+/**
+ * Unescapes the given string value.
+ * @param val String to unescape
+ */
 export function unsafe (val = '') {
   val = val.trim()
   if (isQuoted(val)) {

@@ -1,7 +1,57 @@
-An ini format parser and serializer for node.
+![Deno INI CI](https://github.com/chances/ini/workflows/Deno%20INI%20CI/badge.svg?branch=master)
+
+An INI configuration parser and serializer for the Deno runtime.
 
 Sections are treated as nested objects.  Items before the first
 heading are saved on the object directly.
+
+## API
+
+### `decode(inistring)`
+
+Decode the ini-style formatted `inistring` into a nested object.
+
+### `parse(inistring)`
+
+Alias for `decode(inistring)`
+
+### `encode(object, [options])`
+
+Encode the object `object` into an ini-style formatted string. If the
+optional parameter `section` is given, then all top-level properties
+of the object are put into this section and the `section`-string is
+prepended to all sub-sections, see the usage example above.
+
+The `options` object may contain the following:
+
+* `section` A string which will be the first `section` in the encoded
+  ini data.  Defaults to none.
+* `whitespace` Boolean to specify whether to put whitespace around the
+  `=` character.  By default, whitespace is omitted, to be friendly to
+  some persnickety old parsers that don't tolerate it well.  But some
+  find that it's more human-readable and pretty with the whitespace.
+
+For backwards compatibility reasons, if a `string` options is passed
+in, then it is assumed to be the `section` value.
+
+### `stringify(object, [options])`
+
+Alias for `encode(object, [options])`
+
+### `safe(val)`
+
+Escapes the string `val` such that it is safe to be used as a key or
+value in an ini-file. Basically escapes quotes. For example
+
+    ini.safe('"unsafe string"')
+
+would result in
+
+    "\"unsafe string\""
+
+### `unsafe(val)`
+
+Unescapes the string `val`
 
 ## Usage
 
@@ -51,52 +101,3 @@ to the filesystem with the following content:
     array[]=second value
     array[]=third value
     array[]=fourth value
-
-
-## API
-
-### decode(inistring)
-
-Decode the ini-style formatted `inistring` into a nested object.
-
-### parse(inistring)
-
-Alias for `decode(inistring)`
-
-### encode(object, [options])
-
-Encode the object `object` into an ini-style formatted string. If the
-optional parameter `section` is given, then all top-level properties
-of the object are put into this section and the `section`-string is
-prepended to all sub-sections, see the usage example above.
-
-The `options` object may contain the following:
-
-* `section` A string which will be the first `section` in the encoded
-  ini data.  Defaults to none.
-* `whitespace` Boolean to specify whether to put whitespace around the
-  `=` character.  By default, whitespace is omitted, to be friendly to
-  some persnickety old parsers that don't tolerate it well.  But some
-  find that it's more human-readable and pretty with the whitespace.
-
-For backwards compatibility reasons, if a `string` options is passed
-in, then it is assumed to be the `section` value.
-
-### stringify(object, [options])
-
-Alias for `encode(object, [options])`
-
-### safe(val)
-
-Escapes the string `val` such that it is safe to be used as a key or
-value in an ini-file. Basically escapes quotes. For example
-
-    ini.safe('"unsafe string"')
-
-would result in
-
-    "\"unsafe string\""
-
-### unsafe(val)
-
-Unescapes the string `val`

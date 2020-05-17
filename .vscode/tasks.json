@@ -10,8 +10,9 @@
             "args": [
                 "test",
                 "--allow-read",
-                "test/bar.ts",
-                "test/foo.ts"
+                "test/bar.test.ts",
+                "test/eol.test.ts",
+                "test/foo.test.ts"
             ]
         }
     ]

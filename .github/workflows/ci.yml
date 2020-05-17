@@ -24,4 +24,4 @@ jobs:
       with:
         deno-version: 0.x
     - name: Test
-      run: deno test --allow-read test/bar.ts test/foo.ts
+      run: deno test --allow-read test/
