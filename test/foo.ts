@@ -6,7 +6,6 @@ import * as i from '../ini.ts'
 const { test } = Deno
 const data = readFileStrSync(resolve('./test/fixtures/foo.ini'), { encoding: 'utf-8' })
 
-let d = undefined
 const expectE = 'o=p\n'
             + 'a with spaces=b  c\n'
             + '" xa  n          p "="\\"\\r\\nyoyoyo\\r\\r\\n"\n'
@@ -37,10 +36,10 @@ const expectE = 'o=p\n'
   , expectD =
     { o: 'p',
       'a with spaces': 'b  c',
-      " xa  n          p ":'"\r\nyoyoyo\r\r\n',
+      ' xa  n          p ': '"\r\nyoyoyo\r\r\n',
       '[disturbing]': 'hey you never know',
       's': 'something',
-      's1' : '\"something\'',
+      's1': '\"something\'',
       's2': 'something else',
       'zr': ['deedee'],
       'ar': ['one', 'three', 'this is included'],
@@ -50,7 +49,7 @@ const expectE = 'o=p\n'
        { av: 'a val',
          e: '{ o: p, a: { av: a val, b: { c: { e: "this [value]" } } } }',
          j: '"{ o: "p", a: { av: "a val", b: { c: { e: "this [value]" } } } }"',
-         "[]": "a square?",
+         '[]': 'a square?',
          cr: ['four', 'eight'],
          b: { c: { e: 1, j: 2 } } },
       'x.y.z': {
@@ -82,21 +81,21 @@ test('encodeFromData', function () {
   var e = i.encode(expectD)
   assertEquals(e, expectE)
 
-  var obj = {log: { type:'file', level: {label:'debug', value:10} } }
+  var obj = { log: { type: 'file', level: { label: 'debug', value: 10 } } }
   e = i.encode(obj)
   assertNotEquals(e.slice(0, 1), '\n', 'Never a blank first line')
   assertNotEquals(e.slice(-2), '\n\n', 'Never a blank final line')
 })
 
 test('encodeWithOption', function () {
-  var obj = {log: { type:'file', level: {label:'debug', value:10} } }
+  var obj = { log: { type: 'file', level: { label: 'debug', value: 10 } } }
   const e = i.encode(obj, { section: 'prefix' })
 
   assertEquals(e, expectF)
 })
 
 test('encodeWithWhitespace', function () {
-  var obj = {log: { type:'file', level: {label:'debug', value:10} } }
+  var obj = { log: { type: 'file', level: { label: 'debug', value: 10 } } }
   const e = i.encode(obj, { whitespace: true })
 
   assertEquals(e, expectG)
