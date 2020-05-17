@@ -1,6 +1,6 @@
-import { assertEquals, assertNotEquals } from 'https://deno.land/std/testing/asserts.ts'
-import { readFileStrSync } from 'https://deno.land/std/fs/read_file_str.ts'
-import { resolve } from 'https://deno.land/std/path/mod.ts'
+import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.51.0/testing/asserts.ts'
+import { readFileStrSync } from 'https://deno.land/std@0.51.0/fs/read_file_str.ts'
+import { resolve } from 'https://deno.land/std@0.51.0/path/mod.ts'
 
 import * as i from '../ini.ts'
 const { test } = Deno
@@ -73,12 +73,12 @@ const expectE = 'o=p\n'
             + 'label = debug\n'
             + 'value = 10\n'
 
-test(function decodeFromFile() {
+test('decodeFromFile', function () {
   var d = i.decode(data)
   assertEquals(d, expectD)
 })
 
-test(function encodeFromData() {
+test('encodeFromData', function () {
   var e = i.encode(expectD)
   assertEquals(e, expectE)
 
@@ -88,14 +88,14 @@ test(function encodeFromData() {
   assertNotEquals(e.slice(-2), '\n\n', 'Never a blank final line')
 })
 
-test(function encodeWithOption() {
+test('encodeWithOption', function () {
   var obj = {log: { type:'file', level: {label:'debug', value:10} } }
   const e = i.encode(obj, { section: 'prefix' })
 
   assertEquals(e, expectF)
 })
 
-test(function encodeWithWhitespace() {
+test('encodeWithWhitespace', function () {
   var obj = {log: { type:'file', level: {label:'debug', value:10} } }
   const e = i.encode(obj, { whitespace: true })
 
