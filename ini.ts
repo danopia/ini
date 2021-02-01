@@ -1,7 +1,5 @@
-import * as eol from 'https://deno.land/std@0.51.0/fs/eol.ts'
-
 const isWindows = Deno.build.os == "windows";
-const EOL = isWindows ? eol.EOL.CRLF : eol.EOL.LF;
+const EOL = isWindows ? "\r\n" : "\n";
 
 export const parse = decode
 export const stringify = encode
